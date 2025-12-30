@@ -1,11 +1,72 @@
 package com.example.schedulemanagementapp.service;
 
+import com.example.schedulemanagementapp.dto.*;
+import com.example.schedulemanagementapp.entity.Schedule;
 import com.example.schedulemanagementapp.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
+
+    // 일정 생성
+    @Transactional
+    public CreateScheduleResponse save(CreateScheduleRequest request) {
+        Schedule schedule = new Schedule(request.getTitle(),request.getContent(),request.getName(), request.getPassword());
+        Schedule saved = scheduleRepository.save(schedule);
+        return new CreateScheduleResponse(saved.getScheduleId(), saved.getTitle(), saved.getContent(), saved.getName(), saved.getCreatedAt(), saved.getModifiedAt());
+    }
+
+    // 일정 전체 조회
+    @Transactional(readOnly = true)
+    public List<GetScheduleResponse> findAll() {
+        List<Schedule> schedules = scheduleRepository.findAll();
+        List<GetScheduleResponse> dtos = new ArrayList<>();
+        for (Schedule schedule : schedules) {
+            GetScheduleResponse dto = new GetScheduleResponse(schedule.getScheduleId(), schedule.getTitle(), schedule.getContent(), schedule.getName(), schedule.getCreatedAt(), schedule.getModifiedAt());
+            dtos.add(dto);
+        }
+        // modifiedAt을 기준으로 한 리스트 정렬 로직 필요!
+        return dtos;
+    }
+
+    // 일정 선택 조회
+    @Transactional(readOnly = true)
+    public GetScheduleResponse findOne(Long scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
+                () -> new IllegalArgumentException("Schedule with id " + scheduleId + " does not exist")
+        );
+        return new GetScheduleResponse(schedule.getScheduleId(), schedule.getTitle(), schedule.getContent(), schedule.getName(), schedule.getCreatedAt(), schedule.getModifiedAt());
+    }
+
+    // 일정 수정
+    @Transactional
+    public UpdateScheduleResponse update(Long scheduleId, UpdateScheduleRequest request) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
+                () -> new IllegalArgumentException("Schedule with id " + scheduleId + " does not exist")
+        );
+        if (!schedule.getPassword().equals(request.getPassword())) {
+            throw new IllegalArgumentException("Passwords do not match");
+        }
+        schedule.update(request.getTitle(), request.getName());
+        return new UpdateScheduleResponse(schedule.getScheduleId(), schedule.getTitle(), schedule.getContent(), schedule.getName(), schedule.getCreatedAt(), schedule.getModifiedAt());
+    }
+
+    // 일정 삭제
+    @Transactional
+    public void delete(Long scheduleId) {
+        boolean existence = scheduleRepository.existsById(scheduleId);
+        if (!existence) {
+            throw new IllegalArgumentException("Schedule with id " + scheduleId + " does not exist");
+        }
+        scheduleRepository.deleteById(scheduleId);
+    }
 }
