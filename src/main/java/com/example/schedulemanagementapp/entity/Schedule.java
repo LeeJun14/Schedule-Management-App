@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
+@Table(name = "/schedules")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Schedule extends BaseEntity{
     @Id
