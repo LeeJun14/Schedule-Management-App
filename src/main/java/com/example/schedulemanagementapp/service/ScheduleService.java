@@ -1,22 +1,23 @@
 package com.example.schedulemanagementapp.service;
 
-import com.example.schedulemanagementapp.dto.*;
+import com.example.schedulemanagementapp.dto.create.schedule.CreateScheduleRequest;
+import com.example.schedulemanagementapp.dto.create.schedule.CreateScheduleResponse;
+import com.example.schedulemanagementapp.dto.get.schedule.GetScheduleResponse;
+import com.example.schedulemanagementapp.dto.update.schedule.UpdateScheduleRequest;
+import com.example.schedulemanagementapp.dto.update.schedule.UpdateScheduleResponse;
 import com.example.schedulemanagementapp.entity.Schedule;
+import com.example.schedulemanagementapp.repository.CommentRepository;
 import com.example.schedulemanagementapp.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
+    private final CommentRepository commentRepository;
 
     // 일정 생성
     @Transactional
@@ -28,14 +29,14 @@ public class ScheduleService {
 
     // 일정 전체 조회
     @Transactional(readOnly = true)
-    public List<GetScheduleResponse> findAll() {
-        List<Schedule> schedules = scheduleRepository.findAllByOrderByModifiedAtDesc();
-        List<GetScheduleResponse> dtos = new ArrayList<>();
-        for (Schedule schedule : schedules) {
-            GetScheduleResponse dto = new GetScheduleResponse(schedule.getScheduleId(), schedule.getTitle(), schedule.getContent(), schedule.getName(), schedule.getCreatedAt(), schedule.getModifiedAt());
-            dtos.add(dto);
+    public List<GetScheduleResponse> findAll(String name) {
+        List<Schedule> schedules;
+        if(name == null ||  name.isEmpty()) {
+            schedules = scheduleRepository.findAllByOrderByModifiedAtDesc();
+        } else {
+            schedules = scheduleRepository.findAllByNameOrderByModifiedAtDesc(name);
         }
-        return dtos;
+        return schedules.stream().map(schedule -> new GetScheduleResponse(schedule.getScheduleId(), schedule.getTitle(), schedule.getContent(), schedule.getName(), schedule.getCreatedAt(), schedule.getModifiedAt())).toList();
     }
 
     // 일정 선택 조회
