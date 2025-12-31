@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -28,13 +29,12 @@ public class ScheduleService {
     // 일정 전체 조회
     @Transactional(readOnly = true)
     public List<GetScheduleResponse> findAll() {
-        List<Schedule> schedules = scheduleRepository.findAll();
+        List<Schedule> schedules = scheduleRepository.findAllByOrderByModifiedAtDesc();
         List<GetScheduleResponse> dtos = new ArrayList<>();
         for (Schedule schedule : schedules) {
             GetScheduleResponse dto = new GetScheduleResponse(schedule.getScheduleId(), schedule.getTitle(), schedule.getContent(), schedule.getName(), schedule.getCreatedAt(), schedule.getModifiedAt());
             dtos.add(dto);
         }
-        // modifiedAt을 기준으로 한 리스트 정렬 로직 필요!
         return dtos;
     }
 
