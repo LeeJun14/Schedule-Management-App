@@ -15,10 +15,16 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final ScheduleRepository scheduleRepository;
 
+    private final int maxComments = 10;
+
     @Transactional
     public CreateCommentResponse save(Long scheduleId, CreateCommentRequest request) {
         if(!scheduleRepository.existsById(scheduleId)) {
             throw new IllegalArgumentException("Invalid schedule id: " + scheduleId);
+        }
+        long commentCount = commentRepository.countByScheduleId(scheduleId);
+        if(commentCount >= maxComments) {
+            throw new IllegalArgumentException("Too many comments");
         }
         Comment comment = new Comment(request.getContent(),request.getName(), request.getPassword());
         comment.setScheduleId(scheduleId);
