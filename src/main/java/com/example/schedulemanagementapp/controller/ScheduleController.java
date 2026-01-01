@@ -2,6 +2,7 @@ package com.example.schedulemanagementapp.controller;
 
 import com.example.schedulemanagementapp.dto.create.schedule.CreateScheduleRequest;
 import com.example.schedulemanagementapp.dto.create.schedule.CreateScheduleResponse;
+import com.example.schedulemanagementapp.dto.delete.schedule.DeleteScheduleRequest;
 import com.example.schedulemanagementapp.dto.get.schedule.GetScheduleResponse;
 import com.example.schedulemanagementapp.dto.update.schedule.UpdateScheduleRequest;
 import com.example.schedulemanagementapp.dto.update.schedule.UpdateScheduleResponse;
@@ -47,8 +48,8 @@ public class ScheduleController {
 
     // 일정 삭제
     @DeleteMapping("/schedules/{scheduleId}")
-    public ResponseEntity<Void> deleteSchedule(@PathVariable Long scheduleId) {
-        scheduleService.delete(scheduleId);
+    public ResponseEntity<Void> deleteSchedule(@PathVariable Long scheduleId, @RequestBody DeleteScheduleRequest request) {
+        scheduleService.delete(scheduleId, request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

@@ -2,6 +2,7 @@ package com.example.schedulemanagementapp.service;
 
 import com.example.schedulemanagementapp.dto.create.schedule.CreateScheduleRequest;
 import com.example.schedulemanagementapp.dto.create.schedule.CreateScheduleResponse;
+import com.example.schedulemanagementapp.dto.delete.schedule.DeleteScheduleRequest;
 import com.example.schedulemanagementapp.dto.get.comment.GetCommentResponse;
 import com.example.schedulemanagementapp.dto.get.schedule.GetScheduleResponse;
 import com.example.schedulemanagementapp.dto.update.schedule.UpdateScheduleRequest;
@@ -68,10 +69,14 @@ public class ScheduleService {
 
     // 일정 삭제
     @Transactional
-    public void delete(Long scheduleId) {
+    public void delete(Long scheduleId, DeleteScheduleRequest request) {
         boolean existence = scheduleRepository.existsById(scheduleId);
         if (!existence) {
             throw new IllegalArgumentException("Schedule with id " + scheduleId + " does not exist");
+        }
+        Schedule schedule = scheduleRepository.findById(scheduleId).get();
+        if (!schedule.getPassword().equals(request.getPassword())) {
+            throw new IllegalArgumentException("Passwords do not match");
         }
         scheduleRepository.deleteById(scheduleId);
     }
