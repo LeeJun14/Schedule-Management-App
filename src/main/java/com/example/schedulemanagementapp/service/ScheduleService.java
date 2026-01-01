@@ -2,15 +2,18 @@ package com.example.schedulemanagementapp.service;
 
 import com.example.schedulemanagementapp.dto.create.schedule.CreateScheduleRequest;
 import com.example.schedulemanagementapp.dto.create.schedule.CreateScheduleResponse;
+import com.example.schedulemanagementapp.dto.get.comment.GetCommentResponse;
 import com.example.schedulemanagementapp.dto.get.schedule.GetScheduleResponse;
 import com.example.schedulemanagementapp.dto.update.schedule.UpdateScheduleRequest;
 import com.example.schedulemanagementapp.dto.update.schedule.UpdateScheduleResponse;
+import com.example.schedulemanagementapp.entity.Comment;
 import com.example.schedulemanagementapp.entity.Schedule;
 import com.example.schedulemanagementapp.repository.CommentRepository;
 import com.example.schedulemanagementapp.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
@@ -45,7 +48,9 @@ public class ScheduleService {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new IllegalArgumentException("Schedule with id " + scheduleId + " does not exist")
         );
-        return new GetScheduleResponse(schedule.getScheduleId(), schedule.getTitle(), schedule.getContent(), schedule.getName(), schedule.getCreatedAt(), schedule.getModifiedAt());
+        List<Comment> comments = commentRepository.findAllByScheduleIdOrderByCreatedAtDesc(scheduleId);
+        List<GetCommentResponse> responses = comments.stream().map(comment -> new GetCommentResponse(comment.getCommentId(), comment.getContent(), comment.getName(), comment.getCreatedAt(), comment.getModifiedAt())).toList();
+        return new GetScheduleResponse(schedule.getScheduleId(), schedule.getTitle(), schedule.getContent(), schedule.getName(), schedule.getCreatedAt(), schedule.getModifiedAt(), responses);
     }
 
     // 일정 수정

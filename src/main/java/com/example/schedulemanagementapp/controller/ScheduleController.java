@@ -17,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ScheduleController {
     private final ScheduleService scheduleService;
+    private final CommentService commentService;
 
     // 일정 생성
     @PostMapping("/schedules")
